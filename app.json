@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "sail-temp",
-    "slug": "sail-temp",
+    "name": "sail-frontend",
+    "slug": "sail-frontend",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "scheme": "sail-temp",
+    "scheme": "sail-frontend",
     "ios": {
       "supportsTablet": true
     },
