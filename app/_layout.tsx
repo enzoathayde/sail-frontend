@@ -1,15 +1,19 @@
 
-import { useFonts } from '@expo-google-fonts/inter';
-import { Slot } from 'expo-router'
-import { fontsToLoad } from '../constants/theme';
+import { useFonts } from "@expo-google-fonts/inter";
+import { Stack } from "expo-router";
+
+import { fontsToLoad } from "../constants/theme";
 
 const RootLayout = () => {
-  const [ loaded ] = useFonts(fontsToLoad)
+  const [loaded] = useFonts(fontsToLoad);
 
   if (!loaded) return null;
 
-  return <Slot />
-}
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="profile" options={{ headerShown: true, title: "Meu perfil" }} />
+    </Stack>
+  );
+};
 
 export default RootLayout;
-

@@ -1,48 +1,69 @@
-import { useState, useEffect} from "react";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { Redirect } from "expo-router";
+
 import Welcome from "./welcome";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Sign from "./sign";
+import { colors } from "../constants/theme";
 
 async function getWelcomeAsyncItem(): Promise<string | null> {
-
-  const response = AsyncStorage.getItem('welcome');
+  const response = AsyncStorage.getItem("welcome");
 
   return response;
 }
 async function getJwtAsyncItem(): Promise<string | null> {
-
-  const response = AsyncStorage.getItem('jwt');
+  const response = AsyncStorage.getItem("jwt");
 
   return response;
 }
 
 const Index = () => {
-
-  const [hasAlreadyWelcome, setHasAlreadyWelcome] = useState<string | null>(null);
-  const [loggedUser, setLoggedUser] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [hasAlreadyWelcome, setHasAlreadyWelcome] = useState<boolean>(false);
+  const [loggedUser, setLoggedUser] = useState<boolean>(false);
 
   useEffect(() => {
-    const getWelcome = async () => {
-      const welcomeResult = await getWelcomeAsyncItem()
-      setHasAlreadyWelcome(welcomeResult);
-    }
-    const getLogged = async () => {
-      const loggedResult = await getJwtAsyncItem()
-      setLoggedUser(loggedResult);
-    }
-    
-    getWelcome();
-    getLogged();
-  },[])
+    const hydrate = async () => {
+      const [welcomeResult, loggedResult] = await Promise.all([
+        getWelcomeAsyncItem(),
+        getJwtAsyncItem(),
+      ]);
 
-  return (
-    <>
-      { !hasAlreadyWelcome && <Welcome /> }
-      { hasAlreadyWelcome && !loggedUser && <Sign /> }
-    </>
-  )
+      setHasAlreadyWelcome(Boolean(welcomeResult));
+      setLoggedUser(Boolean(loggedResult));
+      setIsLoading(false);
+    };
 
+    hydrate();
+  }, []);
 
-}
+  if (isLoading) {
+    return (
+      <View style={styles.loading_container}>
+        <ActivityIndicator color={colors.inverse} size="large" />
+      </View>
+    );
+  }
+
+  if (!hasAlreadyWelcome) {
+    return <Welcome />;
+  }
+
+  if (!loggedUser) {
+    return <Sign />;
+  }
+
+  return <Redirect href="/main" />;
+};
+
+const styles = StyleSheet.create({
+  loading_container: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.primary,
+  },
+});
 
 export default Index;

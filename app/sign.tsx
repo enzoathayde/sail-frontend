@@ -1,16 +1,19 @@
 import { useState } from "react";
-import { View, Image, StyleSheet } from "react-native";
+import { Alert, Image, StyleSheet, View } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
 
 import GenInput from "../components/ui/genInput";
 import SecondaryButton from "../components/ui/secondaryButton";
 import CustomText from "../components/ui/customText";
-import { fontFamily } from "../constants/theme";
+import { colors, fontFamily } from "../constants/theme";
 import PrimaryButton from "../components/ui/primaryButton";
 import WordLine from "../components/ui/wordLine";
 
 const Sign = () => {
   const [newUser, setNewUser] = useState<boolean>(false);
   const [inputKey, setInputKey] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [newUserKey, setNewUserKey] = useState<Array<string>>([
     "aqui",
     "vai",
@@ -32,6 +35,33 @@ const Sign = () => {
     setNewUserKey(chave);
   }
 
+  async function enterWithKey() {
+    if (!inputKey.trim()) {
+      Alert.alert("Chave obrigatória", "Digite sua chave de acesso antes de continuar.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      await AsyncStorage.setItem("jwt", `mock-jwt:${inputKey.trim()}`);
+      router.replace("/main");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function continueWithGeneratedKey() {
+    setIsSubmitting(true);
+
+    try {
+      await AsyncStorage.setItem("jwt", `mock-jwt:${newUserKey.join("-")}`);
+      router.replace("/main");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   return (
     <>
       {newUser && (
@@ -48,7 +78,11 @@ const Sign = () => {
 
           <View style={styles.btn_list_container}>
             <PrimaryButton textDescription="Gerar chave de acesso" onPress={generateAccessKey} />
-            <SecondaryButton textDescription="Não tenho cadastro" onPress={softReload} />
+            <PrimaryButton
+              textDescription={isSubmitting ? "Entrando..." : "Continuar"}
+              onPress={continueWithGeneratedKey}
+            />
+            <SecondaryButton textDescription="Já tenho cadastro" onPress={softReload} />
           </View>
         </View>
       )}
@@ -60,8 +94,12 @@ const Sign = () => {
           </CustomText>
           <GenInput
             typeValue={inputKey}
-            changeFunction={(t: any) => setInputKey(t)}
+            changeFunction={setInputKey}
             fieldName="aqui você cola a senha do cofre"
+          />
+          <PrimaryButton
+            textDescription={isSubmitting ? "Entrando..." : "Entrar"}
+            onPress={enterWithKey}
           />
           <SecondaryButton textDescription="Não tenho cadastro" onPress={softReload} />
         </View>
@@ -76,12 +114,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     gap: 20,
+    backgroundColor: colors.secondary,
   },
   container_up: {
     flex: 1,
     justifyContent: "space-between",
     alignItems: "center",
     paddingBlock: 25,
+    backgroundColor: colors.secondary,
   },
   text_warn: {
     fontSize: 22,
