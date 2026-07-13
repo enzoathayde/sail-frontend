@@ -1,7 +1,7 @@
 import { useState, useEffect} from "react";
-import Welcome from "./welcome/welcome";
+import Welcome from "./welcome";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Sign from "./sign/sign";
+import Sign from "./sign";
 
 async function getWelcomeAsyncItem(): Promise<string | null> {
 
