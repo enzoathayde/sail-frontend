@@ -1,4 +1,4 @@
-import { Text as RNText, StyleSheet} from "react-native"
+import { Text as RNText } from "react-native"
 import { AppTextProps } from "../../interfaces/props/customTextProps";
 
 const CustomText = ({ declaredFont, ...props }: AppTextProps) => {

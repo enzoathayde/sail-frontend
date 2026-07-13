@@ -1,10 +1,10 @@
-import { Text, Image, StyleSheet, View } from "react-native"
+import { Image, StyleSheet, View } from "react-native"
 import PrimaryButton from "../../components/ui/primaryButton";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomText from "../../components/ui/customText";
 import { fontFamily } from "../../constants/theme";
-fontFamily
+
 
 async function startRegistry() {
     await AsyncStorage.setItem('welcome', 'ok');

@@ -1,5 +1,5 @@
 import { StyleSheet, View } from "react-native"
-import { colors, fontFamily } from "../../constants/theme"
+import { fontFamily } from "../../constants/theme"
 import { WordLineProps } from "../../interfaces/props/wordLineProps"
 import CustomText from "./customText"
 
