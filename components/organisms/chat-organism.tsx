@@ -42,11 +42,11 @@ function SuggestionCard({
   message,
   onApprove,
   onReject,
-}: {
+}: Readonly<{
   message: ChatMessage;
   onApprove: (suggestionId: string) => Promise<void>;
   onReject: (suggestionId: string) => Promise<void>;
-}) {
+}>) {
   const suggestion = message.suggestion;
 
   if (!suggestion) {
@@ -127,11 +127,11 @@ function MessageBubble({
   message,
   onApprove,
   onReject,
-}: {
+}: Readonly<{
   message: ChatMessage;
   onApprove: (suggestionId: string) => Promise<void>;
   onReject: (suggestionId: string) => Promise<void>;
-}) {
+}>) {
   if (message.role === "user") {
     return (
       <View style={styles.user_message_row}>
@@ -155,7 +155,7 @@ function MessageBubble({
         </CustomText>
         {message.status === "loading" && (
           <View style={styles.loading_row}>
-            <ActivityIndicator color={colors.inverse} />
+            <ActivityIndicator color={colors.charcoal900} />
             <CustomText declaredFont={fontFamily.regular} style={styles.loading_text}>
               Estruturando o gasto...
             </CustomText>
@@ -260,15 +260,6 @@ const ChatOrganism = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.hero}>
-        <CustomText declaredFont={fontFamily.bold} style={styles.hero_title}>
-          Registre um gasto em linguagem natural
-        </CustomText>
-        <CustomText declaredFont={fontFamily.regular} style={styles.hero_text}>
-          Exemplo: paguei 52 reais no mercado Silva no débito.
-        </CustomText>
-      </View>
-
       <ScrollView
         ref={scrollViewRef}
         contentContainerStyle={styles.messages_container}
@@ -277,10 +268,13 @@ const ChatOrganism = () => {
         {messages.length === 0 && (
           <View style={styles.empty_state}>
             <CustomText declaredFont={fontFamily.bold} style={styles.empty_state_title}>
-              Seu chat começa aqui
+              Seu controle financeiro começa aqui.
             </CustomText>
             <CustomText declaredFont={fontFamily.regular} style={styles.empty_state_text}>
-              Envie uma frase curta e a Sail devolve um card estruturado para você aprovar ou rejeitar.
+              Registre um gasto em linguagem natural.
+            </CustomText>
+            <CustomText declaredFont={fontFamily.regular} style={styles.empty_state_text}>
+               Exemplo: paguei 52 reais no mercado Silva no débito.
             </CustomText>
           </View>
         )}
@@ -300,7 +294,7 @@ const ChatOrganism = () => {
           maxLength={MESSAGE_LIMIT + 40}
           onChangeText={setMessageInput}
           placeholder="Descreva um gasto..."
-          placeholderTextColor={colors.muted}
+          placeholderTextColor={colors.taupe600}
           style={[styles.input, isOverLimit && styles.input_error]}
           value={messageInput}
         />
@@ -329,24 +323,24 @@ const ChatOrganism = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.secondary,
+    backgroundColor: colors.sand250,
   },
   hero: {
     paddingHorizontal: 18,
     paddingTop: 12,
     paddingBottom: 16,
-    backgroundColor: "#E7E0D4",
+    backgroundColor: colors.sand250,
     borderBottomWidth: 1,
-    borderBottomColor: "#D7CFBF",
+    borderBottomColor: colors.sand400,
     gap: 6,
   },
   hero_title: {
-    fontSize: 24,
-    color: colors.inverse,
+    fontSize: 20,
+    color: colors.charcoal900,
   },
   hero_text: {
     fontSize: 14,
-    color: colors.pale,
+    color: colors.taupe700,
     lineHeight: 20,
   },
   messages_container: {
@@ -355,34 +349,33 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   empty_state: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.stone50,
     borderRadius: 22,
     padding: 18,
     borderWidth: 1,
-    borderColor: "#DED7CA",
-    gap: 8,
+    borderColor: colors.sand350,
   },
   empty_state_title: {
     fontSize: 18,
-    color: colors.inverse,
+    color: colors.charcoal900,
+    paddingBottom: 12
   },
   empty_state_text: {
     fontSize: 14,
-    color: colors.pale,
-    lineHeight: 20,
+    color: colors.taupe700,
   },
   user_message_row: {
     alignItems: "flex-end",
   },
   user_bubble: {
     maxWidth: "84%",
-    backgroundColor: colors.inverse,
+    backgroundColor: colors.charcoal900,
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
   user_message_text: {
-    color: colors.primary,
+    color: colors.stone50,
     lineHeight: 20,
   },
   assistant_message_row: {
@@ -390,19 +383,19 @@ const styles = StyleSheet.create({
   },
   assistant_bubble: {
     width: "100%",
-    backgroundColor: colors.primary,
+    backgroundColor: colors.stone50,
     borderRadius: 24,
     padding: 16,
     borderWidth: 1,
-    borderColor: "#DED7CA",
+    borderColor: colors.sand350,
     gap: 10,
   },
   assistant_title: {
     fontSize: 16,
-    color: colors.inverse,
+    color: colors.charcoal900,
   },
   assistant_message_text: {
-    color: colors.pale,
+    color: colors.taupe700,
     lineHeight: 20,
   },
   loading_row: {
@@ -411,13 +404,13 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   loading_text: {
-    color: colors.pale,
+    color: colors.taupe700,
   },
   card: {
-    backgroundColor: "#F3EEE5",
+    backgroundColor: colors.sand100,
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: "#DED7CA",
+    borderColor: colors.sand350,
     padding: 14,
     gap: 10,
   },
@@ -426,19 +419,19 @@ const styles = StyleSheet.create({
   },
   card_label: {
     fontSize: 12,
-    color: colors.muted,
+    color: colors.taupe600,
     textTransform: "uppercase",
   },
   card_value: {
     fontSize: 16,
-    color: colors.inverse,
+    color: colors.charcoal900,
     lineHeight: 22,
   },
   card_footer: {
     paddingTop: 4,
   },
   card_status: {
-    color: colors.pale,
+    color: colors.taupe700,
   },
   action_row: {
     flexDirection: "row",
@@ -456,31 +449,31 @@ const styles = StyleSheet.create({
     opacity: 0.55,
   },
   reject_button: {
-    backgroundColor: "#E8DED1",
+    backgroundColor: colors.sand300,
     borderWidth: 1,
-    borderColor: "#C8BBA8",
+    borderColor: colors.sand500,
   },
   approve_button: {
-    backgroundColor: colors.inverse,
+    backgroundColor: colors.charcoal900,
   },
   reject_button_text: {
-    color: colors.inverse,
+    color: colors.charcoal900,
   },
   approve_button_text: {
-    color: colors.primary,
+    color: colors.stone50,
   },
   error_notice: {
     borderRadius: 14,
-    backgroundColor: "#FDE8E5",
+    backgroundColor: colors.rose100,
     padding: 12,
   },
   error_notice_text: {
-    color: "#8A2F23",
+    color: colors.red800,
   },
   composer: {
     borderTopWidth: 1,
-    borderTopColor: "#DED7CA",
-    backgroundColor: colors.primary,
+    borderTopColor: colors.sand350,
+    backgroundColor: colors.stone50,
     paddingHorizontal: 14,
     paddingTop: 12,
     paddingBottom: 18,
@@ -491,14 +484,14 @@ const styles = StyleSheet.create({
     maxHeight: 148,
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: "#CEC6B9",
+    borderColor: colors.sand450,
     paddingHorizontal: 14,
     paddingVertical: 12,
     textAlignVertical: "top",
-    backgroundColor: "#FFFDF8",
+    backgroundColor: colors.ivory50,
   },
   input_error: {
-    borderColor: "#B33F32",
+    borderColor: colors.red700,
   },
   composer_footer: {
     flexDirection: "row",
@@ -507,14 +500,14 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   counter_text: {
-    color: colors.pale,
+    color: colors.taupe700,
     fontSize: 12,
   },
   counter_text_error: {
-    color: "#B33F32",
+    color: colors.red700,
   },
   send_button: {
-    backgroundColor: colors.inverse,
+    backgroundColor: colors.charcoal900,
     borderRadius: 14,
     paddingHorizontal: 18,
     paddingVertical: 12,
@@ -523,7 +516,7 @@ const styles = StyleSheet.create({
     opacity: 0.45,
   },
   send_button_text: {
-    color: colors.primary,
+    color: colors.stone50,
   },
 });
 

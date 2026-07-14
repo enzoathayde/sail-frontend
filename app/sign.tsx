@@ -114,14 +114,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     gap: 20,
-    backgroundColor: colors.secondary,
+    backgroundColor: colors.sand150,
   },
   container_up: {
     flex: 1,
     justifyContent: "space-between",
     alignItems: "center",
     paddingBlock: 25,
-    backgroundColor: colors.secondary,
+    backgroundColor: colors.sand150,
   },
   text_warn: {
     fontSize: 22,

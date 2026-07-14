@@ -9,7 +9,7 @@ const GenInput = (props: GenericInput) => {
       value={props.typeValue}
       onChangeText={props.changeFunction}
       placeholder={props.fieldName}
-      placeholderTextColor={colors.muted}
+      placeholderTextColor={colors.taupe600}
       secureTextEntry={props.secureTextEntry}
     />
   );
@@ -23,8 +23,8 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    borderColor: colors.smooth,
-    backgroundColor: colors.primary,
+    borderColor: colors.sand200,
+    backgroundColor: colors.stone50,
   },
 });
 

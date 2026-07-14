@@ -1,28 +1,17 @@
-import { Pressable, StyleSheet, View } from "react-native";
-import { router } from "expo-router";
-
+import { StyleSheet, View } from "react-native";
 import ChatOrganism from "../components/organisms/chat-organism";
-import CustomText from "../components/ui/customText";
-import { colors, fontFamily } from "../constants/theme";
+import { colors } from "../constants/theme";
+import NavHeader from "../components/molecules/nav-header";
+import { Direction } from "../interfaces/props/navHeaderProps";
 
 const Main = () => {
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.header_copy}>
-          <CustomText declaredFont={fontFamily.bold} style={styles.eyebrow}>
-            Sail
-          </CustomText>
-          <CustomText declaredFont={fontFamily.bold} style={styles.title}>
-            Chat de gastos
-          </CustomText>
-        </View>
-        <Pressable onPress={() => router.push("/profile")} style={styles.profile_button}>
-          <CustomText declaredFont={fontFamily.bold} style={styles.profile_button_text}>
-            ↑
-          </CustomText>
-        </Pressable>
-      </View>
+      <NavHeader 
+        headerDescription="Meus Lançamentos"
+        navTo="profile"
+        buttonDirection={Direction.right}
+      />
       <ChatOrganism />
     </View>
   );
@@ -31,42 +20,14 @@ const Main = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.secondary,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 18,
-    paddingTop: 18,
-    paddingBottom: 12,
-    backgroundColor: colors.secondary,
-  },
-  header_copy: {
-    gap: 2,
+    backgroundColor: colors.sand150,
   },
   eyebrow: {
     fontSize: 12,
     letterSpacing: 1.4,
     textTransform: "uppercase",
-    color: colors.muted,
-  },
-  title: {
-    fontSize: 30,
-    color: colors.inverse,
-  },
-  profile_button: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.inverse,
-  },
-  profile_button_text: {
-    color: colors.primary,
-    fontSize: 18,
-  },
+    color: colors.taupe600,
+  }
 });
 
 export default Main;

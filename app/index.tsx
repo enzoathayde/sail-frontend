@@ -41,7 +41,7 @@ const Index = () => {
   if (isLoading) {
     return (
       <View style={styles.loading_container}>
-        <ActivityIndicator color={colors.inverse} size="large" />
+        <ActivityIndicator color={colors.charcoal900} size="large" />
       </View>
     );
   }
@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.primary,
+    backgroundColor: colors.stone50,
   },
 });
 

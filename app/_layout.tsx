@@ -11,7 +11,7 @@ const RootLayout = () => {
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="profile" options={{ headerShown: true, title: "Meu perfil" }} />
+      <Stack.Screen name="profile"/>
     </Stack>
   );
 };
