@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Alert, Image, StyleSheet, View } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 
 import GenInput from "../components/ui/genInput";
@@ -9,30 +8,40 @@ import CustomText from "../components/ui/customText";
 import { colors, fontFamily } from "../constants/theme";
 import PrimaryButton from "../components/ui/primaryButton";
 import WordLine from "../components/ui/wordLine";
+import { authenticateVaultUser, registerVaultUser } from "../services/authService";
+import { useAuthStore } from "../stores/authStore";
+import { Session } from "../interfaces/auth";
 
 const Sign = () => {
   const [newUser, setNewUser] = useState<boolean>(false);
   const [inputKey, setInputKey] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [newUserKey, setNewUserKey] = useState<Array<string>>([
-    "aqui",
-    "vai",
-    "ter",
-    "os termos",
-    "da chave",
-    "do seu",
-    "cofre",
-    "secreto",
-  ]);
+  const [newUserKey, setNewUserKey] = useState<Array<string>>([]);
+  const [generatedSession, setGeneratedSession] = useState<Session | null>(null);
+  const setSession = useAuthStore((state) => state.setSession);
 
   function softReload() {
     setNewUser(!newUser);
   }
 
-  function generateAccessKey() {
-    const chave = ["bala", "girafa", "emoji", "blog", "gato", "quadro"];
+  async function generateAccessKey() {
+    setIsSubmitting(true);
 
-    setNewUserKey(chave);
+    try {
+      const generated = await registerVaultUser();
+
+      setNewUserKey(generated.vaultKey.split(" "));
+      setGeneratedSession({
+        id: generated.id,
+        userName: generated.userName,
+        token: generated.token,
+        vaultKey: generated.vaultKey,
+      });
+    } catch (error) {
+      Alert.alert("Erro ao gerar chave", "Não foi possível gerar sua chave de acesso. Tente novamente.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   async function enterWithKey() {
@@ -44,19 +53,36 @@ const Sign = () => {
     setIsSubmitting(true);
 
     try {
-      await AsyncStorage.setItem("jwt", `mock-jwt:${inputKey.trim()}`);
+      const authenticated = await authenticateVaultUser(inputKey.trim());
+
+      await setSession({
+        id: authenticated.id,
+        userName: authenticated.userName,
+        token: authenticated.token,
+      });
+
       router.replace("/main");
+    } catch (error) {
+      Alert.alert("Falha na autenticação", "Chave inválida ou não encontrada. Confira e tente novamente.");
     } finally {
       setIsSubmitting(false);
     }
   }
 
   async function continueWithGeneratedKey() {
+    if (!generatedSession) {
+      Alert.alert("Chave obrigatória", "Gere sua chave de acesso antes de continuar.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      await AsyncStorage.setItem("jwt", `mock-jwt:${newUserKey.join("-")}`);
+      await setSession(generatedSession);
+
       router.replace("/main");
+    } catch (error) {
+      Alert.alert("Erro ao entrar", "Não foi possível concluir seu cadastro. Tente novamente.");
     } finally {
       setIsSubmitting(false);
     }
@@ -72,12 +98,16 @@ const Sign = () => {
               Vamos iniciar seu cadastro. Gere a chave do seu primeiro acesso.
             </CustomText>
           </View>
-          {newUserKey.map((value: string, index: number) => {
-            return <WordLine word={value} lineIndex={index + 1} key={value} />;
-          })}
+          {newUserKey.length > 0 &&
+            newUserKey.map((value: string, index: number) => {
+              return <WordLine word={value} lineIndex={index + 1} key={`${value}-${index}`} />;
+            })}
 
           <View style={styles.btn_list_container}>
-            <PrimaryButton textDescription="Gerar chave de acesso" onPress={generateAccessKey} />
+            <PrimaryButton
+              textDescription={isSubmitting ? "Gerando..." : "Gerar chave de acesso"}
+              onPress={generateAccessKey}
+            />
             <PrimaryButton
               textDescription={isSubmitting ? "Entrando..." : "Continuar"}
               onPress={continueWithGeneratedKey}
@@ -96,6 +126,7 @@ const Sign = () => {
             typeValue={inputKey}
             changeFunction={setInputKey}
             fieldName="aqui você cola a senha do cofre"
+            secureTextEntry
           />
           <PrimaryButton
             textDescription={isSubmitting ? "Entrando..." : "Entrar"}

@@ -1,26 +1,20 @@
 export type MessageRole = "user" | "assistant";
 
-export type MessageStatus = "idle" | "loading" | "approved" | "rejected" | "error";
-
-export interface ExpenseSuggestion {
-  id: string;
-  summary: string;
-  merchant: string;
-  amountBRL: number;
-  paymentMethod: string;
-}
+export type MessageStatus = "idle" | "loading" | "received" | "error";
 
 export interface ChatMessage {
   id: string;
   role: MessageRole;
   text: string;
   status: MessageStatus;
-  suggestion?: ExpenseSuggestion;
   errorMessage?: string;
   createdAt: string;
 }
 
-export interface ExpenseParseResponse {
-  replyText: string;
-  suggestion: ExpenseSuggestion;
+export interface ChatMessageResponse {
+  id: number;
+  userId: number;
+  sender: "USER" | "ASSISTANT";
+  content: string;
+  createdAt: string;
 }
