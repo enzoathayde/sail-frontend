@@ -5,6 +5,7 @@ import CustomText from "../ui/customText";
 import GenInput from "../ui/genInput";
 import { colors, fontFamily } from "../../constants/theme";
 import { ExpenseData } from "../../interfaces/chat";
+import { centsToCurrency, currencyToDecimal, maskCurrency, valorToCents } from "../../utils/currencyMask";
 
 interface ExpenseEditModalProps {
   visible?: boolean;
@@ -19,7 +20,7 @@ const ExpenseEditModal = ({ visible, expense, onSave, onClose }: ExpenseEditModa
 
   useEffect(() => {
     if (visible && expense) {
-      setValor(expense.valor ?? "");
+      setValor(centsToCurrency(valorToCents(expense.valor ?? "")));
       setEstabelecimento(expense.estabelecimento ?? "");
     }
   }, [visible, expense]);
@@ -31,7 +32,7 @@ const ExpenseEditModal = ({ visible, expense, onSave, onClose }: ExpenseEditModa
 
     onSave({
       ...expense,
-      valor: valor.trim() || expense.valor,
+      valor: currencyToDecimal(valor),
       estabelecimento: estabelecimento.trim() || expense.estabelecimento,
     });
   }
@@ -48,7 +49,12 @@ const ExpenseEditModal = ({ visible, expense, onSave, onClose }: ExpenseEditModa
             <CustomText declaredFont={fontFamily.bold} style={styles.label}>
               Valor
             </CustomText>
-            <GenInput typeValue={valor} changeFunction={setValor} fieldName="valor do gasto" />
+            <GenInput
+              typeValue={valor}
+              changeFunction={setValor}
+              maskFunction={maskCurrency}
+              fieldName="R$ 80.98"
+            />
           </View>
 
           <View style={styles.field}>
@@ -58,19 +64,19 @@ const ExpenseEditModal = ({ visible, expense, onSave, onClose }: ExpenseEditModa
             <GenInput
               typeValue={estabelecimento}
               changeFunction={setEstabelecimento}
-              fieldName="nome do estabelecimento"
+              fieldName="Ex: Shopee, Ifood, Renner..."
             />
           </View>
 
           <View style={styles.actions}>
-            <Pressable onPress={handleSave} style={[styles.button, styles.save_button]}>
-              <CustomText declaredFont={fontFamily.bold} style={styles.save_text}>
-                Salvar
-              </CustomText>
-            </Pressable>
             <Pressable onPress={onClose} style={[styles.button, styles.cancel_button]}>
               <CustomText declaredFont={fontFamily.bold} style={styles.cancel_text}>
                 Cancelar
+              </CustomText>
+            </Pressable>
+            <Pressable onPress={handleSave} style={[styles.button, styles.save_button]}>
+              <CustomText declaredFont={fontFamily.bold} style={styles.save_text}>
+                Salvar
               </CustomText>
             </Pressable>
           </View>
@@ -107,8 +113,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 13,
-    color: colors.taupe700,
-    alignSelf: "flex-start",
+    color: colors.taupe700
   },
   actions: {
     flexDirection: "row",

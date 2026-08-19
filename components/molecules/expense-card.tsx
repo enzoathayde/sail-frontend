@@ -77,14 +77,14 @@ const ExpenseCard = ({ expense, status, onApprove, onReject }: ExpenseCardProps)
 
       {!resolved && (
         <View style={styles.actions}>
-          <Pressable onPress={onApprove} style={[styles.action_button, styles.approve_button]}>
-            <CustomText declaredFont={fontFamily.bold} style={styles.approve_text}>
-              Aprovar
-            </CustomText>
-          </Pressable>
           <Pressable onPress={onReject} style={[styles.action_button, styles.reject_button]}>
             <CustomText declaredFont={fontFamily.bold} style={styles.reject_text}>
               Recusar
+            </CustomText>
+          </Pressable>
+          <Pressable onPress={onApprove} style={[styles.action_button, styles.approve_button]}>
+            <CustomText declaredFont={fontFamily.bold} style={styles.approve_text}>
+              Aprovar
             </CustomText>
           </Pressable>
         </View>
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.ivory50,
     borderRadius: 16,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: colors.sand350,
     padding: 14,
     gap: 10,

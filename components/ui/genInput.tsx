@@ -7,10 +7,11 @@ const GenInput = (props: GenericInput) => {
     <TextInput
       style={styles.input}
       value={props.typeValue}
-      onChangeText={props.changeFunction}
+      onChangeText={(text) => props.changeFunction(props.maskFunction ? props.maskFunction(text) : text)}
       placeholder={props.fieldName}
       placeholderTextColor={colors.taupe600}
       secureTextEntry={props.secureTextEntry}
+      keyboardType={props.maskFunction ? "number-pad" : undefined}
     />
   );
 };
