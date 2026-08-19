@@ -1,5 +1,6 @@
 export interface GenericInput {
-  typeValue: string, 
-  changeFunction: (a: any) => void,
-  fieldName: string
+  typeValue: string,
+  changeFunction: (value: string) => void,
+  fieldName: string,
+  secureTextEntry?: boolean
 }

@@ -17,10 +17,10 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 20,
     textAlign: 'center',
-    color: colors.primary
+    color: colors.stone50
   },
   touchable: {
-    backgroundColor: colors.inverse,
+    backgroundColor: colors.charcoal900,
     width: '93%',
     padding: 15,
     borderRadius: 15

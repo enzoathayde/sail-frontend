@@ -17,14 +17,14 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 20,
     textAlign: 'center',
-    color: colors.inverse
+    color: colors.charcoal900
   },
   touchable: {
-    backgroundColor: colors.smooth,
+    backgroundColor: colors.sand200,
     width: '93%',
     padding: 12,
     borderRadius: 15,
-    borderColor: colors.inverse,
+    borderColor: colors.charcoal900,
     borderWidth: 2
   }
 })
