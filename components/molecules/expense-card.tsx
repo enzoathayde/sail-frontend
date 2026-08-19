@@ -9,7 +9,6 @@ interface ExpenseCardProps {
   status: MessageStatus;
   onApprove: () => void;
   onReject: () => void;
-  onEdit: () => void;
 }
 
 function formatParcelas(parcelas?: string | number | null): string | null {
@@ -23,7 +22,7 @@ function formatParcelas(parcelas?: string | number | null): string | null {
   return `${formatted}x`;
 }
 
-const ExpenseCard = ({ expense, status, onApprove, onReject, onEdit }: ExpenseCardProps) => {
+const ExpenseCard = ({ expense, status, onApprove, onReject }: ExpenseCardProps) => {
   const resolved = status === "approved" || status === "rejected";
   const parcelas = formatParcelas(expense.parcelas);
 
@@ -88,11 +87,6 @@ const ExpenseCard = ({ expense, status, onApprove, onReject, onEdit }: ExpenseCa
               Recusar
             </CustomText>
           </Pressable>
-          <Pressable onPress={onEdit} style={[styles.action_button, styles.edit_button]}>
-            <CustomText declaredFont={fontFamily.bold} style={styles.edit_text}>
-              Editar
-            </CustomText>
-          </Pressable>
         </View>
       )}
     </View>
@@ -137,6 +131,7 @@ const styles = StyleSheet.create({
     color: colors.taupe700,
   },
   actions: {
+    paddingTop: 12,
     flexDirection: "row",
     gap: 8,
   },
@@ -161,15 +156,6 @@ const styles = StyleSheet.create({
   },
   reject_text: {
     color: colors.red700,
-    fontSize: 13,
-  },
-  edit_button: {
-    backgroundColor: colors.sand200,
-    borderWidth: 1,
-    borderColor: colors.sand450,
-  },
-  edit_text: {
-    color: colors.taupe700,
     fontSize: 13,
   },
 });

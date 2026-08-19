@@ -7,7 +7,7 @@ import { colors, fontFamily } from "../../constants/theme";
 import { ExpenseData } from "../../interfaces/chat";
 
 interface ExpenseEditModalProps {
-  visible: boolean;
+  visible?: boolean;
   expense: ExpenseData | null;
   onSave: (updated: ExpenseData) => void;
   onClose: () => void;

@@ -17,6 +17,7 @@ import { getChatHistory, sendChatMessage } from "../../services/chatService";
 import { connectChatSocket, disconnectChatSocket } from "../../services/chatSocketService";
 import { parseAssistantPayload } from "../../utils/assistantPayload";
 import { useAuthStore } from "../../stores/authStore";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 const MESSAGE_LIMIT = 280;
 
@@ -234,16 +235,30 @@ const ChatOrganism = () => {
                   message.status === "error" && styles.assistant_bubble_error,
                 ]}
               >
+              <View style={styles.card_line}>
                 <CustomText declaredFont={fontFamily.bold} style={styles.assistant_title}>
                   Assistente
                 </CustomText>
+                {message.expense && (
+                  <Pressable
+                    hitSlop={8}
+                    onPress={() => setEditingId(message.id)}
+                    style={styles.edit_icon_button}
+                  >
+                    <MaterialCommunityIcons
+                      name="pencil-circle"
+                      size={26}
+                      color={colors.charcoal900}
+                    />
+                  </Pressable>
+                )}
+              </View>
                 {message.expense ? (
                   <ExpenseCard
                     expense={message.expense}
                     status={message.status}
                     onApprove={() => handleApprove(message.id)}
                     onReject={() => handleReject(message.id)}
-                    onEdit={() => setEditingId(message.id)}
                   />
                 ) : (
                   <CustomText
@@ -323,6 +338,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 16,
     gap: 14,
+  },
+  card_line: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  edit_icon_button: {
+    padding: 2,
   },
   empty_state: {
     backgroundColor: colors.stone50,
