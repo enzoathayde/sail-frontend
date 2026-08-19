@@ -3,13 +3,20 @@ import { ChatMessageResponse } from "../interfaces/chat";
 import { StandardResponse } from "../interfaces/auth";
 
 export async function sendChatMessage(
-  userId: number,
   content: string,
 ): Promise<ChatMessageResponse> {
   const response = await apiClient.post<StandardResponse<ChatMessageResponse>>("/chat/messages", {
-    userId,
     content,
   });
+
+  return response.data.data;
+}
+
+export async function getChatHistory(): Promise<ChatMessageResponse[]> {
+
+  console.log('sss')
+
+  const response = await apiClient.get<StandardResponse<ChatMessageResponse[]>>("/chat/messages");
 
   return response.data.data;
 }

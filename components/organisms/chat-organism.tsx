@@ -10,9 +10,12 @@ import { Alert } from "react-native";
 
 import CustomText from "../ui/customText";
 import { colors, fontFamily } from "../../constants/theme";
-import { ChatMessage } from "../../interfaces/chat";
-import { sendChatMessage } from "../../services/chatService";
+import { AssistantPayload, ChatMessage, ExpenseData } from "../../interfaces/chat";
+import ExpenseCard from "../molecules/expense-card";
+import ExpenseEditModal from "../molecules/expense-edit-modal";
+import { getChatHistory, sendChatMessage } from "../../services/chatService";
 import { connectChatSocket, disconnectChatSocket } from "../../services/chatSocketService";
+import { parseAssistantPayload } from "../../utils/assistantPayload";
 import { useAuthStore } from "../../stores/authStore";
 
 const MESSAGE_LIMIT = 280;
@@ -21,24 +24,16 @@ function buildMessageId() {
   return `msg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-function extractAssistantText(body: string): string {
-  try {
-    const parsed = JSON.parse(body);
-
-    if (typeof parsed === "string") {
-      return parsed;
-    }
-    if (parsed && typeof parsed.data === "string") {
-      return parsed.data;
-    }
-    if (parsed && typeof parsed.content === "string") {
-      return parsed.content;
-    }
-  } catch (error) {
-    // payload is plain text, fall through
-  }
-
-  return body;
+function toChatMessage(role: "user" | "assistant", parsed: AssistantPayload, id: string, createdAt: string): ChatMessage {
+  return {
+    id,
+    role,
+    text: parsed.kind === "text" ? (parsed.text ?? "") : parsed.message,
+    status: parsed.kind === "error" ? "error" : "received",
+    errorMessage: parsed.kind === "error" ? parsed.message : undefined,
+    expense: parsed.kind === "expense" ? parsed.expense : null,
+    createdAt,
+  };
 }
 
 const ChatOrganism = () => {
@@ -46,8 +41,11 @@ const ChatOrganism = () => {
   const [messageInput, setMessageInput] = useState<string>("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isSending, setIsSending] = useState<boolean>(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const userId = useAuthStore((state) => state.id);
   const userName = useAuthStore((state) => state.userName);
+
+  const editingMessage = messages.find((message) => message.id === editingId) ?? null;
 
   const scrollToEnd = useCallback(() => {
     scrollViewRef.current?.scrollToEnd({ animated: true });
@@ -58,6 +56,42 @@ const ChatOrganism = () => {
   }, [messages, scrollToEnd]);
 
   useEffect(() => {
+
+    if (userId === null) {
+      return;
+    }
+
+    let cancelled = false;
+
+    getChatHistory()
+      .then((history) => {
+        if (cancelled) {
+          return;
+        }
+
+        setMessages(
+          history.map((message) => {
+            const parsed = parseAssistantPayload(message.content);
+
+            return toChatMessage(
+              message.sender === "USER" ? "user" : "assistant",
+              parsed,
+              String(message.id),
+              message.createdAt,
+            );
+          }),
+        );
+      })
+      .catch(() => {
+        // mantém a conversa vazia
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
+
+  useEffect(() => {
     if (userId === null) {
       return;
     }
@@ -65,15 +99,11 @@ const ChatOrganism = () => {
     connectChatSocket(
       userId,
       (body) => {
+        const parsed = parseAssistantPayload(body);
+
         setMessages((previous) => [
           ...previous,
-          {
-            id: buildMessageId(),
-            role: "assistant",
-            text: extractAssistantText(body),
-            status: "received",
-            createdAt: new Date().toISOString(),
-          },
+          toChatMessage("assistant", parsed, buildMessageId(), new Date().toISOString()),
         ]);
       },
     );
@@ -109,7 +139,7 @@ const ChatOrganism = () => {
     setIsSending(true);
 
     try {
-      await sendChatMessage(userId, trimmedMessage);
+      await sendChatMessage(trimmedMessage);
     } catch (error) {
       setMessages((previous) =>
         previous.map((message, index) =>
@@ -121,6 +151,35 @@ const ChatOrganism = () => {
     } finally {
       setIsSending(false);
     }
+  }
+
+  function handleApprove(id: string) {
+    setMessages((previous) =>
+      previous.map((message) =>
+        message.id === id ? { ...message, status: "approved" } : message,
+      ),
+    );
+  }
+
+  function handleReject(id: string) {
+    setMessages((previous) =>
+      previous.map((message) =>
+        message.id === id ? { ...message, status: "rejected" } : message,
+      ),
+    );
+  }
+
+  function handleEditSave(updated: ExpenseData) {
+    if (editingId === null) {
+      return;
+    }
+
+    setMessages((previous) =>
+      previous.map((message) =>
+        message.id === editingId ? { ...message, expense: updated } : message,
+      ),
+    );
+    setEditingId(null);
   }
 
   const charactersLeft = MESSAGE_LIMIT - messageInput.length;
@@ -169,23 +228,49 @@ const ChatOrganism = () => {
 
           return (
             <View key={message.id} style={styles.assistant_message_row}>
-              <View style={styles.assistant_bubble}>
+              <View
+                style={[
+                  styles.assistant_bubble,
+                  message.status === "error" && styles.assistant_bubble_error,
+                ]}
+              >
                 <CustomText declaredFont={fontFamily.bold} style={styles.assistant_title}>
                   Assistente
                 </CustomText>
-                <CustomText declaredFont={fontFamily.regular} style={styles.assistant_message_text}>
-                  {message.text}
-                </CustomText>
+                {message.expense ? (
+                  <ExpenseCard
+                    expense={message.expense}
+                    status={message.status}
+                    onApprove={() => handleApprove(message.id)}
+                    onReject={() => handleReject(message.id)}
+                    onEdit={() => setEditingId(message.id)}
+                  />
+                ) : (
+                  <CustomText
+                    declaredFont={fontFamily.regular}
+                    style={[
+                      styles.assistant_message_text,
+                      message.status === "error" && styles.assistant_message_error,
+                    ]}
+                  >
+                    {message.text}
+                  </CustomText>
+                )}
               </View>
             </View>
           );
         })}
 
         {isWaitingReply && (
-          <View style={styles.loading_row}>
-            <CustomText declaredFont={fontFamily.regular} style={styles.loading_text}>
-              Analisando seu gasto...
-            </CustomText>
+          <View style={styles.assistant_message_row}>
+            <View style={styles.assistant_bubble}>
+              <CustomText declaredFont={fontFamily.bold} style={styles.assistant_title}>
+                Assistente
+              </CustomText>
+              <CustomText declaredFont={fontFamily.regular} style={styles.loading_text}>
+                Analisando seu gasto...
+              </CustomText>
+            </View>
           </View>
         )}
       </ScrollView>
@@ -218,6 +303,13 @@ const ChatOrganism = () => {
           </Pressable>
         </View>
       </View>
+
+      <ExpenseEditModal
+        visible={editingId !== null}
+        expense={editingMessage?.expense ?? null}
+        onSave={handleEditSave}
+        onClose={() => setEditingId(null)}
+      />
     </View>
   );
 };
@@ -283,10 +375,12 @@ const styles = StyleSheet.create({
     color: colors.taupe700,
     lineHeight: 20,
   },
-  loading_row: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
+  assistant_bubble_error: {
+    borderColor: colors.red700,
+    backgroundColor: colors.rose100,
+  },
+  assistant_message_error: {
+    color: colors.red700,
   },
   loading_text: {
     color: colors.taupe700,

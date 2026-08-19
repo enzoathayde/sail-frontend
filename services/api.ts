@@ -1,4 +1,5 @@
 import axios from "axios";
+import { Platform } from "react-native";
 
 import { useAuthStore } from "../stores/authStore";
 
@@ -9,6 +10,7 @@ export const apiClient = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true,
 });
 
 apiClient.interceptors.request.use((config) => {
@@ -20,3 +22,17 @@ apiClient.interceptors.request.use((config) => {
 
   return config;
 });
+
+if (Platform.OS !== "web") {
+  apiClient.interceptors.response.use((response) => {
+    const setCookie = response.headers["set-cookie"];
+
+    if (setCookie) {
+      const header = Array.isArray(setCookie) ? setCookie.join(", ") : String(setCookie);
+      const CookieManager = require("@react-native-cookies/cookies") as typeof import("@react-native-cookies/cookies").default;
+      CookieManager.setFromResponse(API_BASE_URL ?? "", header).catch(() => undefined);
+    }
+
+    return response;
+  });
+}

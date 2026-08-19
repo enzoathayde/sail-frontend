@@ -6,6 +6,8 @@ import Welcome from "./welcome";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Sign from "./sign";
 import { colors } from "../constants/theme";
+import { getCurrentUser, getStoredCookieToken } from "../services/authService";
+import { useAuthStore } from "../stores/authStore";
 
 async function getWelcomeAsyncItem(): Promise<string | null> {
   const response = AsyncStorage.getItem("welcome");
@@ -25,14 +27,23 @@ const Index = () => {
 
   useEffect(() => {
     const hydrate = async () => {
-      const [welcomeResult, loggedResult] = await Promise.all([
-        getWelcomeAsyncItem(),
-        getJwtAsyncItem(),
-      ]);
-
+      const welcomeResult = await getWelcomeAsyncItem();
       setHasAlreadyWelcome(Boolean(welcomeResult));
-      setLoggedUser(Boolean(loggedResult));
-      setIsLoading(false);
+
+      const storedToken = (await getStoredCookieToken()) ?? (await getJwtAsyncItem());
+      if (storedToken) {
+        useAuthStore.setState({ token: storedToken });
+      }
+
+      try {
+        const me = await getCurrentUser();
+        useAuthStore.setState({ id: me.id, userName: me.userName });
+        setLoggedUser(true);
+      } catch {
+        setLoggedUser(false);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     hydrate();

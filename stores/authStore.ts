@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Platform } from "react-native";
 import { create } from "zustand";
 
 import { Session } from "../interfaces/auth";
@@ -41,6 +42,11 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   clearSession: async () => {
     set({ id: null, userName: null, token: null, vaultKey: null });
+
+    if (Platform.OS !== "web") {
+      const CookieManager = require("@react-native-cookies/cookies") as typeof import("@react-native-cookies/cookies").default;
+      await CookieManager.clearAll();
+    }
 
     await AsyncStorage.multiRemove([
       JWT_STORAGE_KEY,

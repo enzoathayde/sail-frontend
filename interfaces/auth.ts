@@ -23,3 +23,8 @@ export interface Session {
   token: string;
   vaultKey?: string;
 }
+
+export interface MeResponse {
+  id: number;
+  userName: string;
+}
