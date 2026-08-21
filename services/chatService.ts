@@ -14,8 +14,6 @@ export async function sendChatMessage(
 
 export async function getChatHistory(): Promise<ChatMessageResponse[]> {
 
-  console.log('sss')
-
   const response = await apiClient.get<StandardResponse<ChatMessageResponse[]>>("/chat/messages");
 
   return response.data.data;
