@@ -42,6 +42,7 @@ const ChatOrganism = () => {
   const [messageInput, setMessageInput] = useState<string>("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isSending, setIsSending] = useState<boolean>(false);
+  const [isWaitingForReply, setIsWaitingForReply] = useState<boolean>(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const userId = useAuthStore((state) => state.id);
   const userName = useAuthStore((state) => state.userName);
@@ -106,6 +107,7 @@ const ChatOrganism = () => {
           ...previous,
           toChatMessage("assistant", parsed, buildMessageId(), new Date().toISOString()),
         ]);
+        setIsWaitingForReply(false);
       },
     );
 
@@ -138,6 +140,7 @@ const ChatOrganism = () => {
     ]);
     setMessageInput("");
     setIsSending(true);
+    setIsWaitingForReply(true);
 
     try {
       await sendChatMessage(trimmedMessage);
@@ -149,6 +152,7 @@ const ChatOrganism = () => {
             : message,
         ),
       );
+      setIsWaitingForReply(false);
     } finally {
       setIsSending(false);
     }
@@ -186,7 +190,7 @@ const ChatOrganism = () => {
   const charactersLeft = MESSAGE_LIMIT - messageInput.length;
   const isOverLimit = charactersLeft < 0;
   const canSend = !isOverLimit && messageInput.trim().length > 0 && !isSending;
-  const isWaitingReply = isSending || messages[messages.length - 1]?.status === "loading";
+  const isWaitingReply = isSending || isWaitingForReply;
 
   return (
     <View style={styles.container}>
