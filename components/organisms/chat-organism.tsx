@@ -15,6 +15,7 @@ import ExpenseCard from "../molecules/expense-card";
 import ExpenseEditModal from "../molecules/expense-edit-modal";
 import { getChatHistory, sendChatMessage } from "../../services/chatService";
 import { connectChatSocket, disconnectChatSocket } from "../../services/chatSocketService";
+import { createTransaction } from "../../services/transactionService";
 import { parseAssistantPayload } from "../../utils/assistantPayload";
 import { useAuthStore } from "../../stores/authStore";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
@@ -158,10 +159,23 @@ const ChatOrganism = () => {
     }
   }
 
-  function handleApprove(id: string) {
+  async function handleApprove(id: string) {
+    const message = messages.find((item) => item.id === id);
+
+    if (!message?.expense) {
+      return;
+    }
+
+    try {
+      await createTransaction(message.expense);
+    } catch (error) {
+      Alert.alert("Falha ao registrar", "Não foi possível registrar o gasto. Tente novamente.");
+      return;
+    }
+
     setMessages((previous) =>
-      previous.map((message) =>
-        message.id === id ? { ...message, status: "approved" } : message,
+      previous.map((item) =>
+        item.id === id ? { ...item, status: "approved" } : item,
       ),
     );
   }

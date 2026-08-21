@@ -5,7 +5,13 @@ import CustomText from "../ui/customText";
 import GenInput from "../ui/genInput";
 import { colors, fontFamily } from "../../constants/theme";
 import { ExpenseData } from "../../interfaces/chat";
-import { centsToCurrency, currencyToDecimal, maskCurrency, valorToCents } from "../../utils/currencyMask";
+import {
+  centsToCurrency,
+  currencyToDecimal,
+  maskCurrency,
+  maskInteger,
+  valorToCents,
+} from "../../utils/currencyMask";
 
 interface ExpenseEditModalProps {
   visible?: boolean;
@@ -17,13 +23,22 @@ interface ExpenseEditModalProps {
 const ExpenseEditModal = ({ visible, expense, onSave, onClose }: ExpenseEditModalProps) => {
   const [valor, setValor] = useState<string>("");
   const [estabelecimento, setEstabelecimento] = useState<string>("");
+  const [categoria, setCategoria] = useState<string>("");
+  const [metodoPagamento, setMetodoPagamento] = useState<string>("");
+  const [parcelas, setParcelas] = useState<string>("");
 
   useEffect(() => {
     if (visible && expense) {
       setValor(centsToCurrency(valorToCents(expense.valor ?? "")));
       setEstabelecimento(expense.estabelecimento ?? "");
+      setCategoria(expense.categoria ?? "");
+      setMetodoPagamento(expense.metodoPagamento ?? "");
+      setParcelas(expense.parcelas != null ? String(expense.parcelas) : "");
     }
   }, [visible, expense]);
+
+  const hasParcelas =
+    expense?.parcelas != null || metodoPagamento.toLowerCase().includes("crédito");
 
   function handleSave() {
     if (!expense) {
@@ -34,6 +49,13 @@ const ExpenseEditModal = ({ visible, expense, onSave, onClose }: ExpenseEditModa
       ...expense,
       valor: currencyToDecimal(valor),
       estabelecimento: estabelecimento.trim() || expense.estabelecimento,
+      categoria: categoria.trim() || expense.categoria,
+      metodoPagamento: metodoPagamento.trim() || expense.metodoPagamento,
+      parcelas: hasParcelas
+        ? parcelas.trim()
+          ? Number(parcelas.trim())
+          : null
+        : expense.parcelas,
     });
   }
 
@@ -67,6 +89,42 @@ const ExpenseEditModal = ({ visible, expense, onSave, onClose }: ExpenseEditModa
               fieldName="Ex: Shopee, Ifood, Renner..."
             />
           </View>
+
+          <View style={styles.field}>
+            <CustomText declaredFont={fontFamily.bold} style={styles.label}>
+              Categoria
+            </CustomText>
+            <GenInput
+              typeValue={categoria}
+              changeFunction={setCategoria}
+              fieldName="Ex: Alimentação, Conta fixa..."
+            />
+          </View>
+
+          <View style={styles.field}>
+            <CustomText declaredFont={fontFamily.bold} style={styles.label}>
+              Método de pagamento
+            </CustomText>
+            <GenInput
+              typeValue={metodoPagamento}
+              changeFunction={setMetodoPagamento}
+              fieldName="Ex: Pix, Cartão Crédito..."
+            />
+          </View>
+
+          {hasParcelas && (
+            <View style={styles.field}>
+              <CustomText declaredFont={fontFamily.bold} style={styles.label}>
+                Parcelas
+              </CustomText>
+              <GenInput
+                typeValue={parcelas}
+                changeFunction={setParcelas}
+                maskFunction={maskInteger}
+                fieldName="Ex: 10"
+              />
+            </View>
+          )}
 
           <View style={styles.actions}>
             <Pressable onPress={onClose} style={[styles.button, styles.cancel_button]}>
@@ -113,7 +171,8 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 13,
-    color: colors.taupe700
+    color: colors.taupe700,
+    alignSelf: "flex-start",
   },
   actions: {
     flexDirection: "row",

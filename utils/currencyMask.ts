@@ -32,3 +32,7 @@ export function currencyToDecimal(valor: string): string {
 
   return clean || "0.00";
 }
+
+export function maskInteger(raw: string): string {
+  return raw.replace(/\D/g, "").slice(0, 3);
+}
